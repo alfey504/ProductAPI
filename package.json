@@ -1,0 +1,16 @@
+{
+  "name": "assignment1",
+  "version": "1.0.0",
+  "description": "simple API using express and sneca",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Abraham Alfred Babu",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.13",
+    "seneca": "^2.1.0"
+  }
+}
