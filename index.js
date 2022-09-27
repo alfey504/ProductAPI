@@ -1,6 +1,7 @@
 var plugin = function (options) {
 	var seneca = this;
 
+	// Adding data to seneca entity
 	seneca.add({
 		role: 'product',
 		cmd: 'add'
@@ -8,6 +9,7 @@ var plugin = function (options) {
 		this.make('products').data$(msg.data).save$(respond);
 	});
 
+	// Loading data based on id from seneca entity
 	seneca.add({
 		role: 'product',
 		cmd: 'load'
@@ -15,6 +17,7 @@ var plugin = function (options) {
 		this.make('products').load$(msg.data.product_id, respond);
 	});
 
+	// Getting all the data from seneca entity 
 	seneca.add({
 		role: 'product',
 		cmd: 'get-all'
@@ -22,6 +25,7 @@ var plugin = function (options) {
 		this.make('products').list$({}, respond);
 	});
 
+	// removing product from the seneca entity
 	seneca.add({
 		role: 'product',
 		cmd: 'delete'
@@ -38,12 +42,13 @@ seneca.use('seneca-entity');
 
 var getRequestCount = 0
 var postRequestCount = 0
+var deleteRequestCount = 0
 
 // handling /product/get_products endpoint
 seneca.add('role:api, cmd:get_products', function (args, done) {
-	console.log(" \product\get_products      GET: Received Request");
 	getRequestCount = getRequestCount + 1
-	console.log(getRequestCount)
+	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
+	console.log(" \product\get_products      GET: Received Request");
 	var product = {
 		product_id: args.product_id
 	}
@@ -63,10 +68,9 @@ seneca.add('role:api, cmd:get_products', function (args, done) {
 
 // handling /product/add_products endpoint
 seneca.add('role:api, cmd:add_products', function (args, done) {
-	console.log("\\product\\add_products      POST: Received Request");
 	postRequestCount = postRequestCount + 1
-	console.log(postRequestCount)
-
+	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
+	console.log("\\product\\add_products      POST: Received Request");
 	//product data
 	var product = {
 		product_name: args.product_name,
@@ -79,25 +83,37 @@ seneca.add('role:api, cmd:add_products', function (args, done) {
 		cmd: 'add',
 		data: product
 	}, (err, msg) => {
-		console.log("\\product\\add_products      POST: Sending Response");
-		done(err, msg);
+		if (err) {
+			console.log(err)
+		} else {
+			console.log("\\product\\add_products      POST: Sending Response");
+			done(err, msg);
+		}
 	})
 });
 
 //handling endpoint /product/get_all_products
 seneca.add('role:api, cmd:get_all_products', (args, done) => {
-	console.log("\product\gett_all_products      GET: Received Request");
+	getRequestCount = getRequestCount + 1
+	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
+	console.log(" \product\get_all_products      GET: Received Request");
 	seneca.act({
 		role: 'product',
 		cmd: 'get-all'
 	}, (err, msg) => {
-		console.log("\product\get_all_products      POST: Sending Response");
-		done(err, msg)
+		if (err) {
+			console.log(err)
+		} else {
+			console.log("\product\get_all_products      GET: Sending Response");
+			done(err, msg)
+		}
 	})
 })
 
 //handling endpoint /product/delete_products
 seneca.add('role:api, cmd:remove_products', function (args, done) {
+	deleteRequestCount = deleteRequestCount + 1
+	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
 	console.log("\product\remove_products      DELETE: Received Request");
 	seneca.act({
 		role: 'product',
@@ -106,17 +122,23 @@ seneca.add('role:api, cmd:remove_products', function (args, done) {
 		if (err) {
 			console.log(err)
 		} else {
+			var finalmsg = {}
 			msg.forEach(m => {
 				console.log(m)
 				seneca.act({
 					role: 'product',
 					cmd: 'delete'
 				}, (err, msg) => {
-					console.log("deleted");
+					if (err) {
+						console.log(err);
+					} else {
+						finalmsg.push(msg);
+						console.log(msg);
+					}
 				})
-		
 			});
-			done(err, msg);
+			console.log(finalmsg)
+			done(err, finalmsg);
 		}
 	})
 
@@ -156,5 +178,5 @@ console.log("server is listening at http://127.0.0.1:3000")
 console.log("Endpoints:")
 console.log("http://127.0.0.1:3000/products/get_products?id=m488ta    method:GET")
 console.log("http://127.0.0.1:3000/products/get_all_products    method:GET")
-console.log("http://127.0.0.1:3000/products/add_products?    method:POST")
+console.log("http://localhost:3000/product/add_products?product_name=ASUS Rog&product_price=2000&product_category=Computers   method:POST")
 console.log("http://127.0.0.1:3000/products/remove_products    method:DELETE")
