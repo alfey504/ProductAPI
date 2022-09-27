@@ -1,22 +1,33 @@
+var plugin = function (options) {
+	var seneca = this;
 
-var plugin = function(options){
-  var seneca = this;
+	seneca.add({
+		role: 'product',
+		cmd: 'add'
+	}, (msg, respond) => {
+		this.make('products').data$(msg.data).save$(respond);
+	});
 
-  seneca.add({role: 'product', cmd:'add'}, (msg, respond) => {
-    this.make('products').data$(msg.data).save$(respond);
-  });
+	seneca.add({
+		role: 'product',
+		cmd: 'load'
+	}, (msg, respond) => {
+		this.make('products').load$(msg.data.product_id, respond);
+	});
 
-  seneca.add({role: 'product', cmd:'load'}, (msg, respond) => {
-    this.make('products').load$(msg.data.product_id, respond);
-  });
+	seneca.add({
+		role: 'product',
+		cmd: 'get-all'
+	}, function (msg, respond) {
+		this.make('products').list$({}, respond);
+	});
 
-  seneca.add({ role: 'product', cmd: 'get-all' }, function (msg, respond) {
-    this.make('products').list$({}, respond);
-  });
-
-  seneca.add({role: 'product', cmd:'delete'}, (msg, respond) => {
-    this.make('products').remove$({}, respond);
-  })
+	seneca.add({
+		role: 'product',
+		cmd: 'delete'
+	}, (msg, respond) => {
+		this.make('products').remove$({}, respond);
+	})
 }
 
 module.exports = plugin
@@ -29,75 +40,116 @@ var getRequestCount = 0
 var postRequestCount = 0
 
 // handling /product/get_products endpoint
-seneca.add('role:api, cmd:get_products', function(args, done){
-    console.log(" \product\get_products      GET: Received Request");
-    getRequestCount = getRequestCount+1
-    console.log(getRequestCount)  
-    var product = {
-      product_id: args.product_id
-    }
-    seneca.act({role: 'product', cmd:'load', data: product}, (err, msg) => {
-      if(err){
-        console.log(err)
-      }else{
-        console.log("\\product\\get_products      GET: Sending Response");
-        done(err, msg);
-      }
-    })
+seneca.add('role:api, cmd:get_products', function (args, done) {
+	console.log(" \product\get_products      GET: Received Request");
+	getRequestCount = getRequestCount + 1
+	console.log(getRequestCount)
+	var product = {
+		product_id: args.product_id
+	}
+	seneca.act({
+		role: 'product',
+		cmd: 'load',
+		data: product
+	}, (err, msg) => {
+		if (err) {
+			console.log(err)
+		} else {
+			console.log("\\product\\get_products      GET: Sending Response");
+			done(err, msg);
+		}
+	})
 });
 
 // handling /product/add_products endpoint
-seneca.add('role:api, cmd:add_products', function(args, done){
-    console.log("\\product\\add_products      POST: Received Request");
-    postRequestCount = postRequestCount + 1   
-    console.log(postRequestCount)
+seneca.add('role:api, cmd:add_products', function (args, done) {
+	console.log("\\product\\add_products      POST: Received Request");
+	postRequestCount = postRequestCount + 1
+	console.log(postRequestCount)
 
-    //product data
-    var product = {
-      product_name: args.product_name,
-      product_price: args.product_price,
-      product_category: args.product_category
-    }
+	//product data
+	var product = {
+		product_name: args.product_name,
+		product_price: args.product_price,
+		product_category: args.product_category
+	}
 
-    seneca.act({role: 'product', cmd: 'add', data: product}, (err, msg) => {
-      console.log("\\product\\add_products      POST: Sending Response");
-      done(err, msg);
-    })
+	seneca.act({
+		role: 'product',
+		cmd: 'add',
+		data: product
+	}, (err, msg) => {
+		console.log("\\product\\add_products      POST: Sending Response");
+		done(err, msg);
+	})
 });
 
 //handling endpoint /product/get_all_products
 seneca.add('role:api, cmd:get_all_products', (args, done) => {
-  console.log("\product\gett_all_products      GET: Received Request");
-  seneca.act({role:'product', cmd:'get-all'}, (err, msg) => {
-    console.log("\product\get_all_products      POST: Sending Response");
-    done(err, msg)
-  })
+	console.log("\product\gett_all_products      GET: Received Request");
+	seneca.act({
+		role: 'product',
+		cmd: 'get-all'
+	}, (err, msg) => {
+		console.log("\product\get_all_products      POST: Sending Response");
+		done(err, msg)
+	})
 })
 
 //handling endpoint /product/delete_products
-seneca.add('role:api, cmd:remove_products', function(args, done){
-  console.log("\product\remove_products      DELETE: Received Request");
-  seneca.act({role: 'product', cmd: 'delete'}, (err, msg) => {
-    cconsole.log("\product\delete_products      DELETE: Sending Response");
-    done(err, msg);
-  })
+seneca.add('role:api, cmd:remove_products', function (args, done) {
+	console.log("\product\remove_products      DELETE: Received Request");
+	seneca.act({
+		role: 'product',
+		cmd: 'get-all'
+	}, (err, msg) => {
+		if (err) {
+			console.log(err)
+		} else {
+			msg.forEach(m => {
+				console.log(m)
+				seneca.act({
+					role: 'product',
+					cmd: 'delete'
+				}, (err, msg) => {
+					console.log("deleted");
+				})
+		
+			});
+			done(err, msg);
+		}
+	})
+
 });
 
-seneca.act('role:web', {use: {
-    prefix: '\product',
-    pin: {role: 'api', cmd: '*'},
-    map: {
-        get_products: {GET: true},
-        add_products: {POST: true},
-        remove_products: {DELETE: true},
-        get_all_products: {GET: true}
-    }
-}})
+seneca.act('role:web', {
+	use: {
+		prefix: '\product',
+		pin: {
+			role: 'api',
+			cmd: '*'
+		},
+		map: {
+			get_products: {
+				GET: true
+			},
+			add_products: {
+				POST: true
+			},
+			remove_products: {
+				DELETE: true
+			},
+			get_all_products: {
+				GET: true
+			}
+		}
+	}
+})
 
 var express = require('express')
 var app = express()
 app.use(require("body-parser").json())
-app.use( seneca.export('web') )
+app.use(seneca.export('web'))
 
 app.listen(3000)
 console.log("server is listening at http://127.0.0.1:3000")
