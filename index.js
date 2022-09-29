@@ -48,7 +48,7 @@ var deleteRequestCount = 0
 seneca.add('role:api, cmd:get_products', function (args, done) {
 	getRequestCount = getRequestCount + 1
 	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
-	console.log(" \product\get_products      GET: Received Request");
+	console.log("\\product\\get_products      GET: Received Request");
 	var product = {
 		product_id: args.product_id
 	}
@@ -96,7 +96,7 @@ seneca.add('role:api, cmd:add_products', function (args, done) {
 seneca.add('role:api, cmd:get_all_products', (args, done) => {
 	getRequestCount = getRequestCount + 1
 	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
-	console.log(" \product\get_all_products      GET: Received Request");
+	console.log("\\product\\get_all_products      GET: Received Request");
 	seneca.act({
 		role: 'product',
 		cmd: 'get-all'
@@ -104,7 +104,7 @@ seneca.add('role:api, cmd:get_all_products', (args, done) => {
 		if (err) {
 			console.log(err)
 		} else {
-			console.log("\product\get_all_products      GET: Sending Response");
+			console.log("\\product\\get_all_products      GET: Sending Response");
 			done(err, msg)
 		}
 	})
@@ -114,7 +114,7 @@ seneca.add('role:api, cmd:get_all_products', (args, done) => {
 seneca.add('role:api, cmd:remove_products', function (args, done) {
 	deleteRequestCount = deleteRequestCount + 1
 	console.log("Processed Request Count --> GET:" + getRequestCount + ", POST:" + postRequestCount + ", DELETE:" + deleteRequestCount)
-	console.log("\product\remove_products      DELETE: Received Request");
+	console.log("\\product\\remove_products      DELETE: Received Request");
 	seneca.act({
 		role: 'product',
 		cmd: 'get-all'
@@ -122,7 +122,7 @@ seneca.add('role:api, cmd:remove_products', function (args, done) {
 		if (err) {
 			console.log(err)
 		} else {
-			var finalmsg = {}
+			// var finalmsg = {}
 			msg.forEach(m => {
 				console.log(m)
 				seneca.act({
@@ -132,13 +132,14 @@ seneca.add('role:api, cmd:remove_products', function (args, done) {
 					if (err) {
 						console.log(err);
 					} else {
-						finalmsg.push(msg);
-						console.log(msg);
+						// finalmsg = { ...msg, ...finalmsg};
+						// console.log(msg);
 					}
 				})
 			});
-			console.log(finalmsg)
-			done(err, finalmsg);
+			// console.log("final message = " + finalmsg)
+			console.log("\\product\\remove_products      DELETE: Sending Response");
+			done(err, {"deleted": "success"});
 		}
 	})
 
