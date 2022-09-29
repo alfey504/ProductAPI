@@ -124,22 +124,17 @@ seneca.add('role:api, cmd:remove_products', function (args, done) {
 		} else {
 			// var finalmsg = {}
 			msg.forEach(m => {
-				console.log(m)
 				seneca.act({
 					role: 'product',
 					cmd: 'delete'
 				}, (err, msg) => {
 					if (err) {
 						console.log(err);
-					} else {
-						// finalmsg = { ...msg, ...finalmsg};
-						// console.log(msg);
-					}
+					} 
 				})
 			});
-			// console.log("final message = " + finalmsg)
 			console.log("\\product\\remove_products      DELETE: Sending Response");
-			done(err, {"deleted": "success"});
+			done(err, msg);
 		}
 	})
 
