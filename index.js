@@ -122,7 +122,6 @@ seneca.add('role:api, cmd:remove_products', function (args, done) {
 		if (err) {
 			console.log(err)
 		} else {
-			// var finalmsg = {}
 			msg.forEach(m => {
 				seneca.act({
 					role: 'product',
